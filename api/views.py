@@ -9,53 +9,54 @@ from rest_framework.response import Response
 
 from api.core.task_runner import task_runner
 from api.core.storage import storage
-from api.models import Task
+from api.models import Task, TaskState
 
 
 @api_view(['POST'])
 def submit(request: Request) -> Response:
     UUID = str(uuid.uuid4())
-    archive_data = base64.decodebytes(request.data['submission_archive'].encode('ascii'))
+    archive_data = base64.decodebytes(request.data['archive'].encode('ascii'))
 
     task_runner.submit(Task.objects.create(
         submission_data_id=storage.put(archive_data),
         gitlab_url=request.data['gitlab_url'],
-        gitlab_token=request.data['gitlab_token'],
+        gitlab_token=request.data['gitlab_private_token'],
         gitlab_project_id=request.data['gitlab_project_id'],
-        moodle_username=request.data['moodle_username'],
+        moodle_username=request.data['username'],
         UUID=UUID,
     ))
-    return Response(json.dumps({ 'UUID': UUID }))
+    return Response({ 'UUID': UUID })
 
 
 @api_view(['GET'])
 def status(request: Request, UUID: str) -> Response:
-    return Response(json.dumps({ 'UUID': '123' }))
+    task = Task.objects.get(UUID=UUID)
+    return Response({ 'UUID': TaskState(task.state).name })
 
 
 @api_view(['GET'])
 def trace(request: Request, UUID: str) -> Response:
-    return Response(json.dumps({ 'UUID': '123' }))
+    return Response({ 'UUID': '123' })
 
 
 @api_view(['GET'])
 def diff(request: Request, UUID: str) -> Response:
-    return Response(json.dumps({ 'UUID': '123' }))
+    return Response({ 'UUID': '123' })
 
 
 @api_view(['POST'])
 def pipeline_output(request: Request, UUID: str) -> Response:
-    return Response(json.dumps({ 'UUID': '123' }))
+    return Response({ 'UUID': '123' })
 
 
 @api_view(['GET'])
 def info(request: Request, UUID: str) -> Response:
-    return Response(json.dumps({ 'UUID': '123' }))
+    return Response({ 'UUID': '123' })
 
 
 @api_view(['GET'])
 def healthcheck(request: Request) -> Response:
-    return Response(json.dumps({ 'status': 'ok' }))
+    return Response({ 'status': 'ok' })
 
 
 api_definition = [

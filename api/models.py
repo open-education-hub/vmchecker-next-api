@@ -4,9 +4,9 @@ from django.db import models
 
 
 class TaskState(Enum):
-    TASK_NEW = 0
-    TASK_WAITING_FOR_RESULTS = 1
-    TASK_DONE = 2
+    new = 0
+    waiting_for_results = 1
+    done = 2
 
 
 class Task(models.Model):
@@ -19,6 +19,6 @@ class Task(models.Model):
     state = models.CharField(
         max_length=1,
         choices=[(tag, tag.value) for tag in TaskState],
-        default=TaskState.TASK_NEW.value,
+        default=TaskState.new.value,
     )
     UUID = models.CharField(max_length=36, blank=False)

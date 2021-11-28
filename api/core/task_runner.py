@@ -6,6 +6,7 @@ from datetime import datetime
 from threading import Thread
 from queue import SimpleQueue
 
+import gitlab
 from git import Repo
 
 from api.models import Task, TaskState
@@ -24,10 +25,10 @@ class Runner():
     def _run(self) -> None:
         while True:
             task: Task = self.task_queue.get()
-            if task.state == TaskState.TASK_NEW.value:
+            if task.state == TaskState.new.value:
                 submit_task(task)
                 self.task_queue.put(task)
-            elif task.state == TaskState.TASK_WAITING_FOR_RESULTS.value:
+            elif task.state == TaskState.waiting_for_results.value:
                 pull_task_results(task)
             else:
                 pass
@@ -60,8 +61,12 @@ def submit_task(task: Task) -> None:
     repo.git.commit('-m', 'wip')
 
     repo.git.push('-u', 'origin', branch_name)
-    print('done')
 
+    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
+    project = gl.projects.get(task.gitlab_project_id)
+    pipeline = project.pipelines.list(ref=branch_name)[0]
+
+    task.gitlab_pipeline_id = pipeline.id
     task.state = TaskState.TASK_WAITING_FOR_RESULTS
     task.save()
 
