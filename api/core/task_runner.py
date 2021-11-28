@@ -31,7 +31,7 @@ class Runner():
         if not hasattr(Runner, '_instance'):
             Runner._instance = None
 
-        if Runner._instance == None:
+        if Runner._instance is None:
             Runner._instance = Runner()
 
         return Runner._instance
@@ -54,9 +54,9 @@ class Runner():
 
 
 def submit_task(task: Task) -> None:
-    hash = hashlib.md5()
-    hash.update(task.gitlab_url.encode('ascii'))
-    repo_folder = hash.hexdigest()
+    folder_hash = hashlib.md5()
+    folder_hash.update(task.gitlab_url.encode('ascii'))
+    repo_folder = folder_hash.hexdigest()
     repo_folder = pathlib.Path('/', 'tmp', repo_folder)
 
     repo = None
@@ -71,7 +71,6 @@ def submit_task(task: Task) -> None:
     branch_name = f'{task.moodle_username}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{task.UUID}'
     repo.git.checkout('-b', branch_name)
 
-    # TODO
     archive = io.BytesIO(storage.get(task.submission_data_id))
     zip_archive = zipfile.ZipFile(archive, 'r')
     zip_archive.extractall(repo_folder / 'src')

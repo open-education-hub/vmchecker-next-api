@@ -1,4 +1,5 @@
-from json import JSONEncoder
+from __future__ import annotations
+from typing import Union
 from enum import Enum
 
 from django.db import models
@@ -8,6 +9,13 @@ class TaskState(str, Enum):
     new = '0'
     waiting_for_results = '1'
     done = '2'
+
+    @staticmethod
+    def from_name(name: str) -> Union[TaskState, None]:
+        for enum in TaskState:
+            if enum.name == name:
+                return enum
+        return
 
 
 class Task(models.Model):

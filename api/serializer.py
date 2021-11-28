@@ -7,12 +7,12 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
-            'submission_data_id',
-            'gitlab_url',
-            'gitlab_token',
-            'gitlab_project_id',
-            'gitlab_pipeline_id',
+            'pk',
+            'UUID',
             'moodle_username',
             'state',
-            'UUID',
+            'gitlab_url',
+            'gitlab_project_id',
+            'gitlab_pipeline_id',
+            'submission_data_id',
         ]

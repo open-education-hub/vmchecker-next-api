@@ -30,13 +30,13 @@ def submit(request: Request) -> Response:
 
 
 @api_view(['GET'])
-def status(request: Request, UUID: str) -> Response:
+def status(_: Request, UUID: str) -> Response:
     task = Task.objects.get(UUID=UUID)
     return Response({ 'status': TaskState(task.state).name })
 
 
 @api_view(['GET'])
-def trace(request: Request, UUID: str) -> Response:
+def trace(_: Request, UUID: str) -> Response:
     task = Task.objects.get(UUID=UUID)
     if task.state != TaskState.done.value:
         return Response({ 'trace': '' })
@@ -51,23 +51,45 @@ def trace(request: Request, UUID: str) -> Response:
 
 
 @api_view(['GET'])
-def diff(request: Request, UUID: str) -> Response:
+def diff(_: Request, UUID: str) -> Response:
     return Response({ 'UUID': '123' })
 
 
 @api_view(['POST'])
-def pipeline_output(request: Request, UUID: str) -> Response:
+def pipeline_output(_: Request, UUID: str) -> Response:
     return Response({ 'UUID': '123' })
 
 
 @api_view(['GET'])
 def info(request: Request) -> Response:
-    serializer = TaskSerializer(Task.objects.all(), many=True)
+    job_status = TaskState.from_name(request.query_params.get('status'))
+    project_id = request.query_params.get('gitlab_project_id')
+    username = request.query_params.get('moodle_username')
+    count = request.query_params.get('count')
+    order = request.query_params.get('order') if request.query_params.get('order') else 'desc'
+
+    tasks = Task.objects.all()
+
+    if job_status:
+        tasks = tasks.filter(status=job_status.value)
+
+    if project_id:
+        tasks = tasks.filter(gitlab_project_id=int(project_id))
+
+    if username:
+        tasks = tasks.filter(moodle_username=username)
+
+    tasks = tasks.order_by('-pk' if order == 'desc' else 'pk')
+
+    if count:
+        tasks = tasks[:int(count)]
+
+    serializer = TaskSerializer(tasks, many=True)
     return Response(serializer.data)
 
 
 @api_view(['GET'])
-def healthcheck(request: Request) -> Response:
+def healthcheck(_: Request) -> Response:
     return Response({ 'status': 'ok' })
 
 
