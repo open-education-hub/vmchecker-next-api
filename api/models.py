@@ -1,12 +1,13 @@
+from json import JSONEncoder
 from enum import Enum
 
 from django.db import models
 
 
-class TaskState(Enum):
-    new = 0
-    waiting_for_results = 1
-    done = 2
+class TaskState(str, Enum):
+    new = '0'
+    waiting_for_results = '1'
+    done = '2'
 
 
 class Task(models.Model):

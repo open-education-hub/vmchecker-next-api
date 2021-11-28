@@ -1,4 +1,6 @@
+from __future__ import annotations
 import io
+import time
 import zipfile
 import hashlib
 import pathlib
@@ -8,6 +10,7 @@ from queue import SimpleQueue
 
 import gitlab
 from git import Repo
+from django.db.models import Q
 
 from api.models import Task, TaskState
 from api.core.storage import storage
@@ -16,11 +19,26 @@ from api.core.storage import storage
 class Runner():
     def __init__(self) -> None:
         self.task_queue = SimpleQueue()
+        self._load_unfinished_tasks()
         self.thread_ctl = Thread(target=self._run, name='Task runner', daemon=True)
         self.thread_ctl.start()
 
     def submit(self, task: Task) -> None:
         self.task_queue.put(task)
+
+    @staticmethod
+    def instance() -> Runner:
+        if not hasattr(Runner, '_instance'):
+            Runner._instance = None
+
+        if Runner._instance == None:
+            Runner._instance = Runner()
+
+        return Runner._instance
+
+    def _load_unfinished_tasks(self) -> None:
+        for task in Task.objects.filter(~Q(state=TaskState.done.value)):
+            self.task_queue.put(task)
 
     def _run(self) -> None:
         while True:
@@ -30,6 +48,7 @@ class Runner():
                 self.task_queue.put(task)
             elif task.state == TaskState.waiting_for_results.value:
                 pull_task_results(task)
+                self.task_queue.put(task)
             else:
                 pass
 
@@ -64,15 +83,24 @@ def submit_task(task: Task) -> None:
 
     gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
     project = gl.projects.get(task.gitlab_project_id)
-    pipeline = project.pipelines.list(ref=branch_name)[0]
+    pipelines = project.pipelines.list(ref=branch_name)
+    while len(pipelines) == 0:
+        pipelines = project.pipelines.list(ref=branch_name)
+        time.sleep(0.1)
 
-    task.gitlab_pipeline_id = pipeline.id
-    task.state = TaskState.TASK_WAITING_FOR_RESULTS
+    task.gitlab_pipeline_id = pipelines[0].id
+    task.state = TaskState.waiting_for_results.value
     task.save()
 
 
 def pull_task_results(task: Task) -> None:
-    pass
+    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
+    project = gl.projects.get(task.gitlab_project_id)
+    pipeline = project.pipelines.get(task.gitlab_pipeline_id)
+    job = pipeline.jobs.list()[0]
 
+    if job.status != 'success':
+        return
 
-task_runner = Runner()
+    task.state = TaskState.done.value
+    task.save()
