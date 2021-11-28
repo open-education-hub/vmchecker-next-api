@@ -18,7 +18,7 @@ from api.core.storage import storage
 
 class Runner():
     def __init__(self) -> None:
-        self.task_queue = SimpleQueue()
+        self.task_queue: SimpleQueue = SimpleQueue()
         self._load_unfinished_tasks()
         self.thread_ctl = Thread(target=self._run, name='Task runner', daemon=True)
         self.thread_ctl.start()
@@ -56,8 +56,7 @@ class Runner():
 def submit_task(task: Task) -> None:
     folder_hash = hashlib.md5()
     folder_hash.update(task.gitlab_url.encode('ascii'))
-    repo_folder = folder_hash.hexdigest()
-    repo_folder = pathlib.Path('/', 'tmp', repo_folder)
+    repo_folder = pathlib.Path('/', 'tmp', folder_hash.hexdigest())
 
     repo = None
     if not repo_folder.exists():

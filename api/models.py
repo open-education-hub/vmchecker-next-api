@@ -15,7 +15,7 @@ class TaskState(str, Enum):
         for enum in TaskState:
             if enum.name == name:
                 return enum
-        return
+        return None
 
 
 class Task(models.Model):
