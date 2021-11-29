@@ -2,8 +2,7 @@ from __future__ import annotations
 import io
 import time
 import zipfile
-import hashlib
-import pathlib
+import base64
 from datetime import datetime
 from threading import Thread
 from queue import SimpleQueue
@@ -54,33 +53,36 @@ class Runner():
 
 
 def submit_task(task: Task) -> None:
-    folder_hash = hashlib.md5()
-    folder_hash.update(task.gitlab_url.encode('ascii'))
-    repo_folder = pathlib.Path('/', 'tmp', folder_hash.hexdigest())
-
-    repo = None
-    if not repo_folder.exists():
-        repo = Repo.clone_from(task.gitlab_url, repo_folder)
-    else:
-        repo = Repo(repo_folder)
-
-    repo.git.checkout('master')
-    repo.git.pull()
+    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
+    project = gl.projects.get(task.gitlab_project_id)
 
     branch_name = f'{task.moodle_username}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{task.UUID}'
-    repo.git.checkout('-b', branch_name)
+    data = {
+        'branch': branch_name,
+        'start_branch': 'master',
+        'commit_message': 'VMChecker backend',
+        'actions': [],
+    }
+
+    items = project.repository_tree(path='src', ref='master', recursive=True, per_page=100)
+    paths = list(map(lambda x: x['path'], items))
 
     archive = io.BytesIO(storage.get(task.submission_data_id))
     zip_archive = zipfile.ZipFile(archive, 'r')
-    zip_archive.extractall(repo_folder / 'src')
-    repo.git.status()
-    repo.git.add('.')
-    repo.git.commit('-m', 'wip')
+    for filename in zip_archive.namelist():
+        if filename.endswith('/'):
+            continue
 
-    repo.git.push('-u', 'origin', branch_name)
+        action = {
+            'action': 'update' if filename in paths else 'create',
+            'file_path': filename,
+            'content': str(base64.b64encode(zip_archive.read(filename)), 'ascii'),
+            'encoding': 'base64',
+        }
+        data['actions'].append(action)
 
-    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
-    project = gl.projects.get(task.gitlab_project_id)
+    project.commits.create(data)
+
     pipelines = project.pipelines.list(ref=branch_name)
     while len(pipelines) == 0:
         pipelines = project.pipelines.list(ref=branch_name)
