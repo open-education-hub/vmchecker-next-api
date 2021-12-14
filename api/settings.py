@@ -7,6 +7,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 GITLAB_URL = os.environ.get('GITLAB_URL', 'https://gitlab.com')
 
+MINIO_ADDRESS = os.environ.get("MINIO_ADDRESS", "localhost:9000")
+MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY", "1234")
+MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "123456789")
+MINIO_BUCKET = os.environ.get("MINIO_BUCKET", "test")
+
 DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = []

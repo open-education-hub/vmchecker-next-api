@@ -8,6 +8,7 @@ django = "*"
 djangorestframework = "*"
 gitpython = "*"
 python-gitlab = "*"
+minio = "*"
 
 [dev-packages]
 pylint = "*"

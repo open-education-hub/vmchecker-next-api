@@ -1,13 +1,59 @@
+import io
 import hashlib
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
+from minio import Minio
+from minio.error import NoSuchKey
+from django.conf import settings
+import urllib3
 
-class Storage():
+
+class Storage(metaclass=ABCMeta):
+    @abstractmethod
     def put(self, data: bytes) -> str:
         raise NotImplementedError()
 
+    @abstractmethod
     def get(self, file_id: str) -> bytes:
         raise NotImplementedError()
+
+
+class MinioStorage(Storage):
+    def __init__(self) -> None:
+        self._client = Minio(
+            settings.MINIO_ADDRESS,
+            access_key=settings.MINIO_ACCESS_KEY,
+            secret_key=settings.MINIO_SECRET_KEY,
+            secure=False,
+        )
+
+        if not self._client.bucket_exists(settings.MINIO_BUCKET):
+            self._client.make_bucket(settings.MINIO_BUCKET)
+
+    def put(self, data: bytes) -> str:
+        file_id = hashlib.sha1(data).hexdigest()
+        self._client.put_object(
+            settings.MINIO_BUCKET,
+            file_id,
+            data,
+            data,
+            content_type="application/zip",
+        )
+        return file_id
+
+    def get(self, file_id: str) -> bytes:
+        try:
+            data: urllib3.response.HTTPResponse = self._client.get_object(settings.MINIO_BUCKET, file_id)
+        except NoSuchKey:
+            return b''
+
+        buffer = io.BytesIO(data.tell())
+        for chunck in data.stream(settings.BLOCK_SIZE):
+            buffer.write(chunck)
+
+        return buffer.read()
+
 
 
 class OnDiskStorage(Storage):
@@ -28,4 +74,4 @@ class OnDiskStorage(Storage):
             return f.read()
 
 
-storage: Storage = OnDiskStorage()
+storage: Storage = MinioStorage()
