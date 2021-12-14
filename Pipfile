@@ -9,6 +9,7 @@ djangorestframework = "*"
 gitpython = "*"
 python-gitlab = "*"
 minio = "*"
+uwsgi = "*"
 
 [dev-packages]
 pylint = "*"

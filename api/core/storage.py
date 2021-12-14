@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
 from minio import Minio
-from minio.error import NoSuchKey
 from django.conf import settings
 import urllib3
 
@@ -37,7 +36,7 @@ class MinioStorage(Storage):
             settings.MINIO_BUCKET,
             file_id,
             data,
-            data,
+            len(data),
             content_type="application/zip",
         )
         return file_id
@@ -45,15 +44,15 @@ class MinioStorage(Storage):
     def get(self, file_id: str) -> bytes:
         try:
             data: urllib3.response.HTTPResponse = self._client.get_object(settings.MINIO_BUCKET, file_id)
-        except NoSuchKey:
+            buffer = io.BytesIO(data.tell())
+            for chunck in data.stream(settings.BLOCK_SIZE):
+                buffer.write(chunck)
+            return buffer.read()
+        except:
             return b''
-
-        buffer = io.BytesIO(data.tell())
-        for chunck in data.stream(settings.BLOCK_SIZE):
-            buffer.write(chunck)
-
-        return buffer.read()
-
+        finally:
+            data.close()
+            data.release_conn()
 
 
 class OnDiskStorage(Storage):
