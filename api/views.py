@@ -3,6 +3,7 @@ import base64
 
 import gitlab
 from django.urls import path
+from django.conf import settings
 from rest_framework.request import Request
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -41,7 +42,7 @@ def trace(_: Request, UUID: str) -> Response:
     if task.state != TaskState.done.value:
         return Response({ 'trace': '' })
 
-    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
+    gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=task.gitlab_token)
     project = gl.projects.get(task.gitlab_project_id)
     pipeline = project.pipelines.get(task.gitlab_pipeline_id)
     pipeline_job = pipeline.jobs.list()[0]

@@ -5,7 +5,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = True
+GITLAB_URL = os.environ.get('GITLAB_URL', 'https://gitlab.com')
+
+DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = []
 
