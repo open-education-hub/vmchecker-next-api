@@ -20,7 +20,6 @@ class TaskState(str, Enum):
 
 class Task(models.Model):
     submission_data_id = models.CharField(max_length=40, blank=False)
-    gitlab_url = models.CharField(max_length=256, blank=False)
     gitlab_token = models.CharField(max_length=256, blank=False)
     gitlab_project_id = models.BigIntegerField(blank=False)
     gitlab_pipeline_id = models.BigIntegerField(default=-1)

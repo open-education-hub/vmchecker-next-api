@@ -21,7 +21,6 @@ def submit(request: Request) -> Response:
 
     Runner.instance().submit(Task.objects.create(
         submission_data_id=storage.put(archive_data),
-        gitlab_url=request.data['gitlab_url'],
         gitlab_token=request.data['gitlab_private_token'],
         gitlab_project_id=request.data['gitlab_project_id'],
         moodle_username=request.data['username'],

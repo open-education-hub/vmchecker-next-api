@@ -11,7 +11,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'UUID',
             'moodle_username',
             'state',
-            'gitlab_url',
             'gitlab_project_id',
             'gitlab_pipeline_id',
             'submission_data_id',
