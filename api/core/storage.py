@@ -44,10 +44,7 @@ class MinioStorage(Storage):
     def get(self, file_id: str) -> bytes:
         try:
             data: urllib3.response.HTTPResponse = self._client.get_object(settings.MINIO_BUCKET, file_id)
-            buffer = io.BytesIO(data.tell())
-            for chunck in data.stream(settings.BLOCK_SIZE):
-                buffer.write(chunck)
-            return buffer.read()
+            return data.data
         except:
             return b''
         finally:
@@ -73,4 +70,4 @@ class OnDiskStorage(Storage):
             return f.read()
 
 
-storage: Storage = OnDiskStorage()
+storage: Storage = MinioStorage()
