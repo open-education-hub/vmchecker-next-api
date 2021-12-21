@@ -35,7 +35,7 @@ class MinioStorage(Storage):
         self._client.put_object(
             settings.MINIO_BUCKET,
             file_id,
-            data,
+            io.BytesIO(data),
             len(data),
             content_type="application/zip",
         )
@@ -73,4 +73,4 @@ class OnDiskStorage(Storage):
             return f.read()
 
 
-storage: Storage = MinioStorage()
+storage: Storage = OnDiskStorage()

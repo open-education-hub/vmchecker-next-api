@@ -72,7 +72,7 @@ def info(request: Request) -> Response:
     tasks = Task.objects.all()
 
     if job_status:
-        tasks = tasks.filter(status=job_status.value)
+        tasks = tasks.filter(state=job_status.value)
 
     if project_id:
         tasks = tasks.filter(gitlab_project_id=int(project_id))
