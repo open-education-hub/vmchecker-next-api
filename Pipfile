@@ -10,6 +10,7 @@ gitpython = "*"
 python-gitlab = "*"
 minio = "*"
 uwsgi = "*"
+mysqlclient = "*"
 
 [dev-packages]
 pylint = "*"
