@@ -6,6 +6,6 @@ docker run \
   --restart always \
   --name vmchecker-api \
   --detach \
-  --env-file "($pwd)/../.env" \
+  --env-file "$(pwd)/.env" \
   -p 8000:8000 \
-  jokeswar:vmchecker-api
+  jokeswar/vmchecker-api
