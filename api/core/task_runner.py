@@ -8,7 +8,7 @@ from threading import Thread
 from queue import SimpleQueue
 
 import gitlab
-from git import Repo
+from django.conf import settings
 from django.db.models import Q
 
 from api.models import Task, TaskState
@@ -36,24 +36,29 @@ class Runner():
         return Runner._instance
 
     def _load_unfinished_tasks(self) -> None:
-        for task in Task.objects.filter(~Q(state=TaskState.done.value)):
+        for task in Task.objects.filter(~Q(state=TaskState.done.value)).filter(~Q(state=TaskState.error.value)):
             self.task_queue.put(task)
 
     def _run(self) -> None:
         while True:
-            task: Task = self.task_queue.get()
-            if task.state == TaskState.new.value:
-                submit_task(task)
-                self.task_queue.put(task)
-            elif task.state == TaskState.waiting_for_results.value:
-                pull_task_results(task)
-                self.task_queue.put(task)
-            else:
-                pass
+            try:
+                task: Task = self.task_queue.get()
+                if task.state == TaskState.new.value:
+                    submit_task(task)
+                    self.task_queue.put(task)
+                elif task.state == TaskState.waiting_for_results.value:
+                    pull_task_results(task)
+                    self.task_queue.put(task)
+                else:
+                    pass
+            except Exception as e:
+                task.state = TaskState.error.value
+                task.errorInfo = str(e)
+                task.save()
 
 
 def submit_task(task: Task) -> None:
-    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
+    gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=task.gitlab_token)
     project = gl.projects.get(task.gitlab_project_id)
 
     branch_name = f'{task.moodle_username}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{task.UUID}'
@@ -94,7 +99,7 @@ def submit_task(task: Task) -> None:
 
 
 def pull_task_results(task: Task) -> None:
-    gl = gitlab.Gitlab('https://gitlab.com', private_token=task.gitlab_token)
+    gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=task.gitlab_token)
     project = gl.projects.get(task.gitlab_project_id)
     pipeline = project.pipelines.get(task.gitlab_pipeline_id)
     job = pipeline.jobs.list()[0]
