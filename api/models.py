@@ -31,4 +31,4 @@ class Task(models.Model):
         default=TaskState.new.value,
     )
     UUID = models.CharField(max_length=36, blank=False)
-    errorInfo = models.CharField(max_length=2048, blank=True)
+    error_info = models.CharField(max_length=2048, blank=True)

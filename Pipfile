@@ -15,6 +15,7 @@ mysqlclient = "*"
 [dev-packages]
 pylint = "*"
 mypy = "*"
+locust = "*"
 
 [requires]
 python_version = "3.8"
