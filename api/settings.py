@@ -14,7 +14,7 @@ MINIO_BUCKET = os.environ.get("MINIO_BUCKET", "test")
 
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
