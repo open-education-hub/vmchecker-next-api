@@ -1,5 +1,6 @@
 import uuid
 import base64
+import logging
 
 import gitlab
 from django.urls import path
@@ -13,6 +14,7 @@ from api.core.storage import storage
 from api.serializer import TaskSerializer
 from api.models import Task, TaskState
 
+log = logging.getLogger(__name__)
 
 @api_view(['POST'])
 def submit(request: Request) -> Response:

@@ -5,4 +5,6 @@ from api.models import Task
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['__str__', 'state']
+    list_filter = ['state']
+    readonly_fields = ['error_info']

@@ -1,8 +1,10 @@
 from __future__ import annotations
 import io
+import os
 import time
 import zipfile
 import base64
+import logging
 from datetime import datetime
 from threading import Thread
 from queue import SimpleQueue
@@ -13,6 +15,9 @@ from django.db.models import Q
 
 from api.models import Task, TaskState
 from api.core.storage import storage
+
+
+log = logging.getLogger(__name__)
 
 
 class Runner():
@@ -40,9 +45,11 @@ class Runner():
             self.task_queue.put(task)
 
     def _run(self) -> None:
+        log.info(f'Task runner thread started (pid: {os.getpid()})')
         while True:
             try:
                 task: Task = self.task_queue.get()
+                log.info(f'Checking task {task.pk} with state {TaskState(task.state).name}')
                 if task.state == TaskState.new.value:
                     submit_task(task)
                     self.task_queue.put(task)
@@ -52,6 +59,7 @@ class Runner():
                 else:
                     pass
             except Exception as e:
+                log.error(f'Error on task {task.pk}: {str(e)}')
                 task.state = TaskState.error.value
                 task.errorInfo = str(e)
                 task.save()
