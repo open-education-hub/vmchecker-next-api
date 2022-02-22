@@ -7,11 +7,11 @@ import base64
 import logging
 from datetime import datetime
 from threading import Thread
-from queue import SimpleQueue
 
 import gitlab
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+from django.db import transaction
 
 from api.models import Task, TaskState
 from api.core.storage import storage
@@ -22,13 +22,8 @@ log = logging.getLogger(__name__)
 
 class Runner():
     def __init__(self) -> None:
-        self.task_queue: SimpleQueue = SimpleQueue()
-        self._load_unfinished_tasks()
         self.thread_ctl = Thread(target=self._run, name='Task runner', daemon=True)
         self.thread_ctl.start()
-
-    def submit(self, task: Task) -> None:
-        self.task_queue.put(task)
 
     @staticmethod
     def instance() -> Runner:
@@ -40,29 +35,28 @@ class Runner():
 
         return Runner._instance
 
-    def _load_unfinished_tasks(self) -> None:
-        for task in Task.objects.filter(~Q(state=TaskState.done.value)).filter(~Q(state=TaskState.error.value)):
-            self.task_queue.put(task)
-
     def _run(self) -> None:
         log.info(f'Task runner thread started (pid: {os.getpid()})')
         while True:
-            try:
-                task: Task = self.task_queue.get()
-                log.info(f'Checking task {task.pk} with state {TaskState(task.state).name}')
-                if task.state == TaskState.new.value:
-                    submit_task(task)
-                    self.task_queue.put(task)
-                elif task.state == TaskState.waiting_for_results.value:
-                    pull_task_results(task)
-                    self.task_queue.put(task)
-                else:
-                    pass
-            except Exception as e:
-                log.error(f'Error on task {task.pk}: {str(e)}')
-                task.state = TaskState.error.value
-                task.errorInfo = str(e)
-                task.save()
+            with transaction.atomic():
+                task: Task = Task.objects.filter(~Q(state=TaskState.done.value)).filter(~Q(state=TaskState.error.value)).select_for_update(skip_locked=True).order_by('updated_at').first()
+                if not task:
+                    time.sleep(1)
+                    continue
+
+                try:
+                    log.info(f'[pid: {os.getpid()}] Checking task {task.pk} with state {TaskState(task.state).name} and updated at {task.updated_at}')
+                    if task.state == TaskState.new.value:
+                        submit_task(task)
+                    elif task.state == TaskState.waiting_for_results.value:
+                        pull_task_results(task)
+                    else:
+                        pass
+                except Exception as e:
+                    log.error(f'Error on task {task.pk}: {str(e)}')
+                    task.state = TaskState.error.value
+                    task.errorInfo = str(e)
+                    task.save()
 
 
 def submit_task(task: Task) -> None:
@@ -113,6 +107,7 @@ def pull_task_results(task: Task) -> None:
     job = pipeline.jobs.list()[0]
 
     if job.status != 'success':
+        task.save()
         return
 
     task.state = TaskState.done.value

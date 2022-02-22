@@ -21,13 +21,13 @@ def submit(request: Request) -> Response:
     UUID = str(uuid.uuid4())
     archive_data = base64.decodebytes(request.data['archive'].encode('ascii'))
 
-    Runner.instance().submit(Task.objects.create(
+    Task.objects.create(
         submission_data_id=storage.put(archive_data),
         gitlab_token=request.data['gitlab_private_token'],
         gitlab_project_id=request.data['gitlab_project_id'],
         moodle_username=request.data['username'],
         UUID=UUID,
-    ))
+    )
     return Response({ 'UUID': UUID })
 
 

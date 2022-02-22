@@ -1,7 +1,6 @@
 FROM python:3.8.10-buster
 
 RUN set -e \
- && apt-get update -y && apt-get install -yqq default-libmysqlclient-dev \
  && pip install pipenv
 
 WORKDIR /opt/api

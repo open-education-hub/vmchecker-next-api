@@ -3,6 +3,7 @@ from typing import Union
 from enum import Enum
 
 from django.db import models
+from django.utils import timezone
 
 
 class TaskState(str, Enum):
@@ -32,3 +33,8 @@ class Task(models.Model):
     )
     UUID = models.CharField(max_length=36, blank=False)
     error_info = models.CharField(max_length=2048, blank=True)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        self.updated_at = timezone.now()
+        return super(Task, self).save(*args, **kwargs)
