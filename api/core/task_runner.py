@@ -36,7 +36,7 @@ class Runner():
         return Runner._instance
 
     def _run(self) -> None:
-        log.info(f'Task runner thread started (pid: {os.getpid()})')
+        log.info(f'Task runner thread started (pid: {os.getpid()}). Gitlab: {settings.GITLAB_URL}')
         while True:
             with transaction.atomic():
                 task: Task = Task.objects.filter(~Q(state=TaskState.done.value)).filter(~Q(state=TaskState.error.value)).select_for_update(skip_locked=True).order_by('updated_at').first()
