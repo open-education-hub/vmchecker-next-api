@@ -7,13 +7,13 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0004_rename_errorinfo_task_error_info'),
+        ("api", "0004_rename_errorinfo_task_error_info"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='updated_at',
+            model_name="task",
+            name="updated_at",
             field=models.DateTimeField(default=django.utils.timezone.now),
         ),
     ]

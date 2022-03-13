@@ -7,18 +7,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0002_remove_task_gitlab_url'),
+        ("api", "0002_remove_task_gitlab_url"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='errorInfo',
+            model_name="task",
+            name="errorInfo",
             field=models.CharField(blank=True, max_length=2048),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='state',
-            field=models.CharField(choices=[(api.models.TaskState['new'], '0'), (api.models.TaskState['waiting_for_results'], '1'), (api.models.TaskState['done'], '2'), (api.models.TaskState['error'], '3')], default='0', max_length=1),
+            model_name="task",
+            name="state",
+            field=models.CharField(
+                choices=[
+                    (api.models.TaskState["new"], "0"),
+                    (api.models.TaskState["waiting_for_results"], "1"),
+                    (api.models.TaskState["done"], "2"),
+                    (api.models.TaskState["error"], "3"),
+                ],
+                default="0",
+                max_length=1,
+            ),
         ),
     ]

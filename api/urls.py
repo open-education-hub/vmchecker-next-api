@@ -7,6 +7,6 @@ from api.views import api_definition
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/', include(api_definition)),
+    path("admin/", admin.site.urls),
+    path("api/v1/", include(api_definition)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

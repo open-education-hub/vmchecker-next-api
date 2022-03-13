@@ -46,7 +46,7 @@ class MinioStorage(Storage):
             data: urllib3.response.HTTPResponse = self._client.get_object(settings.MINIO_BUCKET, file_id)
             return data.data
         except:
-            return b''
+            return b""
         finally:
             data.close()
             data.release_conn()
@@ -55,18 +55,18 @@ class MinioStorage(Storage):
 class OnDiskStorage(Storage):
     def __init__(self) -> None:
         super().__init__()
-        self.data_dir = Path('/', 'tmp', 'data')
+        self.data_dir = Path("/", "tmp", "data")
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
     def put(self, data: bytes) -> str:
         file_id = hashlib.sha1(data).hexdigest()
-        with open(self.data_dir / file_id, 'wb') as f:
+        with open(self.data_dir / file_id, "wb") as f:
             f.write(data)
 
         return file_id
 
     def get(self, file_id: str) -> bytes:
-        with open(str(self.data_dir / file_id), 'rb') as f:
+        with open(str(self.data_dir / file_id), "rb") as f:
             return f.read()
 
 

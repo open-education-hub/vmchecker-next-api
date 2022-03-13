@@ -8,22 +8,40 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Task',
+            name="Task",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('submission_data_id', models.CharField(max_length=40)),
-                ('gitlab_url', models.CharField(max_length=256)),
-                ('gitlab_token', models.CharField(max_length=256)),
-                ('gitlab_project_id', models.BigIntegerField()),
-                ('gitlab_pipeline_id', models.BigIntegerField(default=-1)),
-                ('moodle_username', models.CharField(max_length=256)),
-                ('state', models.CharField(choices=[(api.models.TaskState['new'], '0'), (api.models.TaskState['waiting_for_results'], '1'), (api.models.TaskState['done'], '2')], default='0', max_length=1)),
-                ('UUID', models.CharField(max_length=36)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("submission_data_id", models.CharField(max_length=40)),
+                ("gitlab_url", models.CharField(max_length=256)),
+                ("gitlab_token", models.CharField(max_length=256)),
+                ("gitlab_project_id", models.BigIntegerField()),
+                ("gitlab_pipeline_id", models.BigIntegerField(default=-1)),
+                ("moodle_username", models.CharField(max_length=256)),
+                (
+                    "state",
+                    models.CharField(
+                        choices=[
+                            (api.models.TaskState["new"], "0"),
+                            (api.models.TaskState["waiting_for_results"], "1"),
+                            (api.models.TaskState["done"], "2"),
+                        ],
+                        default="0",
+                        max_length=1,
+                    ),
+                ),
+                ("UUID", models.CharField(max_length=36)),
             ],
         ),
     ]

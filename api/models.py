@@ -7,10 +7,10 @@ from django.utils import timezone
 
 
 class TaskState(str, Enum):
-    new = '0'
-    waiting_for_results = '1'
-    done = '2'
-    error = '3'
+    new = "0"
+    waiting_for_results = "1"
+    done = "2"
+    error = "3"
 
     @staticmethod
     def from_name(name: str) -> Union[TaskState, None]:
