@@ -10,11 +10,12 @@ from datetime import datetime
 from threading import Thread
 
 import gitlab
-from api.core.storage import storage
-from api.models import Task, TaskState
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Q
+
+from api.core.storage import storage
+from api.models import Task, TaskState
 
 log = logging.getLogger(__name__)
 
@@ -113,9 +114,17 @@ def pull_task_results(task: Task) -> None:
     pipeline = project.pipelines.get(task.gitlab_pipeline_id)
     job = pipeline.jobs.list()[0]
 
-    if job.status != "success":
-        task.save()
-        return
+    log.info(
+        f"[pid: {os.getpid()}] Gitlab status of job {job.id} from pipeline {pipeline.id} - (task id: {task.pk}) is {job.status}"
+    )
 
-    task.state = TaskState.done.value
+    if job.status == "canceled":
+        task.state = TaskState.error.value
+        task.error_info = "CANCELED"
+    elif job.status == "success":
+        task.state = TaskState.done.value
+    elif job.status == "failed":
+        task.state = TaskState.error.value
+        task.error_info = "FAILED"
+
     task.save()
