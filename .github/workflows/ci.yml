@@ -1,0 +1,13 @@
+name: CI
+on: [push, pull_request]
+jobs:
+    Linter:
+      runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Code
+              uses: actions/checkout@v2
+              with:
+                fetch-depth: 0
+
+          - name: Run Black
+            uses: jpetrucciani/black-check@20.8b1
