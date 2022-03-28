@@ -40,6 +40,10 @@ jobs:
             with:
               fetch-depth: 0
 
+          - name: Copy Dockerfile
+            run: cp etc/Dockerfile .
+            shell: bash
+
           - name: Login to DockerHub
             uses: docker/login-action@v1
             with:
