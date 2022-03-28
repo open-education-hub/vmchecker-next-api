@@ -56,4 +56,4 @@ jobs:
             uses: docker/build-push-action@v2
             with:
               push: true
-              tags: ${{ github.repository }}:${{ env.BRANCH_NAME }}
+              tags: jokeswar/vmchecker_api:${{ env.BRANCH_NAME }}
