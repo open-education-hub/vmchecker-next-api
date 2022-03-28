@@ -9,3 +9,6 @@ pip3 install pipenv
 pipenv install --system --deploy --dev --ignore-pipfile
 
 cp ./etc/.env .
+
+pipenv run ./bin/minio.sh
+pipenv run ./bin/postgres.sh
