@@ -10,7 +10,7 @@ jobs:
             fetch-depth: 0
 
         - name: Run Black
-          uses: jpetrucciani/black-check@20.8b1
+          uses: jpetrucciani/black-check@master
 
     Test:
         needs: Lint
