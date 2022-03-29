@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -72,6 +73,10 @@ DATABASES = {
         "PORT": os.getenv("DATABASE_PORT"),
     }
 }
+
+if "pytest" == Path(sys.argv[0]).name:  # Covers regular testing
+    DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
+    DATABASES["default"]["NAME"] = ":memory:"
 
 
 # Password validation
