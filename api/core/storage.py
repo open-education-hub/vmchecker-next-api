@@ -1,11 +1,11 @@
-import io
 import hashlib
+import io
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
-from minio import Minio
-from django.conf import settings
 import urllib3
+from django.conf import settings
+from minio import Minio
 
 
 class Storage(metaclass=ABCMeta):
@@ -15,6 +15,9 @@ class Storage(metaclass=ABCMeta):
 
     @abstractmethod
     def get(self, file_id: str) -> bytes:
+        raise NotImplementedError()
+
+    def remove(self, file_id: str) -> None:
         raise NotImplementedError()
 
 
@@ -50,6 +53,9 @@ class MinioStorage(Storage):
         finally:
             data.close()
             data.release_conn()
+
+    def remove(self, file_id: str) -> None:
+        self._client.remove_object(settings.MINIO_BUCKET, file_id)
 
 
 class OnDiskStorage(Storage):

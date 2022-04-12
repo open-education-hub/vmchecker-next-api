@@ -6,6 +6,8 @@ from typing import Union
 from django.db import models
 from django.utils import timezone
 
+from api.core.storage import storage
+
 
 class TaskState(str, Enum):
     new = "0"
@@ -37,5 +39,8 @@ class Task(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
+        if self.state in [TaskState.error.value, TaskState.done.value]:
+            storage.remove(self.submission_data_id)
+
         self.updated_at = timezone.now()
         return super(Task, self).save(*args, **kwargs)
