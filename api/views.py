@@ -1,6 +1,8 @@
 import base64
+import io
 import logging
 import uuid
+import zipfile
 
 import gitlab
 from django.conf import settings
@@ -12,7 +14,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from api.core.storage import storage
-from api.core.task_runner import Runner
 from api.models import Task, TaskState
 from api.serializer import TaskSerializer
 
@@ -80,14 +81,23 @@ def cancel(_: Request, UUID: str) -> Response:
     return Response({"status": "ok"})
 
 
-@api_view(["GET"])
-def diff(_: Request, UUID: str) -> Response:
-    return Response({"UUID": "123"})
-
-
 @api_view(["POST"])
-def pipeline_output(_: Request, UUID: str) -> Response:
-    return Response({"UUID": "123"})
+def get_archive(request: Request) -> Response:
+    gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=request.data["gitlab_private_token"])
+    project = gl.projects.get(request.data["gitlab_project_id"])
+
+    items = project.repository_tree(path="src", ref="master", recursive=True, per_page=100)
+    paths = list(map(lambda x: x["path"], items))
+
+    archive_buffer = io.BytesIO()
+    with zipfile.ZipFile(archive_buffer, "a") as archive:
+        for repo_path in paths:
+            f = project.files.raw(file_path=repo_path, ref="master")
+            archive.writestr(repo_path[len("src/") :], f)
+
+    archive_buffer.seek(0)
+    data = archive_buffer.read()
+    return Response({"diff": base64.encodebytes(data)})
 
 
 @api_view(["GET"])
@@ -128,8 +138,7 @@ api_definition = [
     path("<str:UUID>/status", view=status),
     path("<str:UUID>/cancel", view=cancel),
     path("<str:UUID>/trace", view=trace),
-    path("<str:UUID>/diff", view=diff),
-    path("<str:UUID>/pipeline_output", view=pipeline_output),
+    path("archive", view=get_archive),
     path("info", view=info),
     path("healthcheck", view=healthcheck),
 ]

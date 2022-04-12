@@ -45,7 +45,7 @@ class MinioStorage(Storage):
         try:
             data: urllib3.response.HTTPResponse = self._client.get_object(settings.MINIO_BUCKET, file_id)
             return data.data
-        except:
+        except Exception:
             return b""
         finally:
             data.close()
