@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  backend:
+    image: jokeswar/vmchecker-api
+    restart: always
+    depends_on:
+      - database
+      - storage
+    env_file:
+      - ../.env
+    ports:
+      - "8000:8000"
+
+  database:
+    image: postgres:12.0-alpine
+    restart: always
+    ports:
+      - "5432:${DATABASE_PORT}"
+    environment:
+      POSTGRES_DB: "${DATABASE_NAME}"
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  storage:
+    image: minio/minio
+    restart: always
+    command: [ "server", "/data" ]
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+    volumes:
+      - storage-data:/data
+
+volumes:
+  storage-data:
+  db-data:
