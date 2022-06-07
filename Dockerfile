@@ -11,7 +11,7 @@ COPY manage.py ./
 ADD api ./api
 ADD bin ./bin
 ADD etc ./etc
-RUN ./manage.py collectstatic --no-input
+RUN API_BUILD=1 ./manage.py collectstatic --no-input
 
 EXPOSE 8000
 CMD ./bin/startapi.sh

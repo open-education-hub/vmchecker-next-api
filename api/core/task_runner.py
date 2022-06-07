@@ -89,8 +89,8 @@ def submit_task(task: Task) -> None:
             continue
 
         action = {
-            "action": "update" if filename in paths else "create",
-            "file_path": filename,
+            "action": "update" if f"src/{filename}" in paths else "create",
+            "file_path": f"src/{filename}",
             "content": str(base64.b64encode(zip_archive.read(filename)), "ascii"),
             "encoding": "base64",
         }

@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from django.urls import path
+from prometheus_client import Gauge
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -18,6 +19,17 @@ from api.models import Task, TaskState
 from api.serializer import TaskSerializer
 
 log = logging.getLogger(__name__)
+
+
+tasks_new = Gauge("tasks_new", "New tasks")
+tasks_waiting_for_results = Gauge("tasks_waiting_for_results", "Waiting for results tasks")
+tasks_done = Gauge("tasks_done", "Done tasks")
+tasks_error = Gauge("tasks_error", "Error tasks")
+
+tasks_new.set_function(lambda: Task.objects.filter(state=TaskState.new.value).count())
+tasks_waiting_for_results.set_function(lambda: Task.objects.filter(state=TaskState.waiting_for_results.value).count())
+tasks_done.set_function(lambda: Task.objects.filter(state=TaskState.done.value).count())
+tasks_error.set_function(lambda: Task.objects.filter(state=TaskState.error.value).count())
 
 
 @api_view(["POST"])
@@ -86,12 +98,15 @@ def get_archive(request: Request) -> Response:
     gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=request.data["gitlab_private_token"])
     project = gl.projects.get(request.data["gitlab_project_id"])
 
-    items = project.repository_tree(path="src", ref="master", recursive=True, per_page=100)
-    paths = list(map(lambda x: x["path"], items))
+    tree = project.repository_tree(path="src", ref="master", recursive=True, per_page=100)
 
     archive_buffer = io.BytesIO()
     with zipfile.ZipFile(archive_buffer, "a") as archive:
-        for repo_path in paths:
+        for tree_item in tree:
+            if tree_item["type"] == "tree":
+                continue
+
+            repo_path = tree_item["path"]
             f = project.files.raw(file_path=repo_path, ref="master")
             archive.writestr(repo_path[len("src/") :], f)
 
