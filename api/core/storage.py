@@ -76,6 +76,7 @@ class OnDiskStorage(Storage):
         with open(str(self.data_dir / file_id), "rb") as f:
             return f.read()
 
+
 storage: Storage = None
-if not os.getenv('API_BUILD'):
+if not os.getenv("API_BUILD"):
     storage = MinioStorage()
