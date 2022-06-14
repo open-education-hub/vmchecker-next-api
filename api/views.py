@@ -21,10 +21,10 @@ from api.serializer import TaskSerializer
 log = logging.getLogger(__name__)
 
 
-tasks_new = Gauge("tasks_new", "New tasks")
-tasks_waiting_for_results = Gauge("tasks_waiting_for_results", "Waiting for results tasks")
-tasks_done = Gauge("tasks_done", "Done tasks")
-tasks_error = Gauge("tasks_error", "Error tasks")
+tasks_new = Gauge("vmck_tasks_new", "New tasks")
+tasks_waiting_for_results = Gauge("vmck_tasks_waiting_for_results", "Waiting for results tasks")
+tasks_done = Gauge("vmck_tasks_done", "Done tasks")
+tasks_error = Gauge("vmck_tasks_error", "Error tasks")
 
 tasks_new.set_function(lambda: Task.objects.filter(state=TaskState.new.value).count())
 tasks_waiting_for_results.set_function(lambda: Task.objects.filter(state=TaskState.waiting_for_results.value).count())
