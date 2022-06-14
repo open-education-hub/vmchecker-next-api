@@ -77,7 +77,7 @@ DATABASES = {
     }
 }
 
-if "pytest" == Path(sys.argv[0]).name:  # Covers regular testing
+if "pytest" == Path(sys.argv[0]).name or os.getenv("API_BUILD"):  # Covers regular testing
     DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
     DATABASES["default"]["NAME"] = ":memory:"
 
