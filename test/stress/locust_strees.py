@@ -1,6 +1,8 @@
-import os
 import base64
-from locust import HttpUser, task, between
+import os
+import random
+
+from locust import HttpUser, between, task
 
 
 class QuickstartUser(HttpUser):
@@ -9,21 +11,18 @@ class QuickstartUser(HttpUser):
     def on_start(self):
         empty_zip_data = b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
         self.archive_data = base64.encodebytes(empty_zip_data).decode("ascii")
+        self.UUIDs = []
 
-    @task(4)
-    def ping(self):
-        self.client.get("/api/v1/healthcheck")
+    @task(3)
+    def status(self):
+        if len(self.UUIDs) == 0:
+            return
 
-    @task(4)
-    def info(self):
-        self.client.get(
-            f"/api/v1/info?status=waiting_for_results&amp;gitlab_project_id={os.environ.get('LOCUST_GITLAB_PROJECT_ID')}"
-        )
-        self.client.get(f"/api/v1/info?status=new&amp;gitlab_project_id={os.environ.get('LOCUST_GITLAB_PROJECT_ID')}")
+        self.client.post(f"/api/v1/status", json={"UUID": random.choice(self.UUIDs)})
 
     @task
     def submit(self):
-        self.client.post(
+        response = self.client.post(
             "/api/v1/submit",
             json={
                 "archive": self.archive_data,
@@ -32,3 +31,5 @@ class QuickstartUser(HttpUser):
                 "username": "locust.user",
             },
         )
+
+        self.UUIDs.append(response.json()["UUID"])

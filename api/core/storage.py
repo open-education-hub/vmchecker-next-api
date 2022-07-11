@@ -1,6 +1,6 @@
-import os
 import hashlib
 import io
+import os
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
@@ -46,14 +46,16 @@ class MinioStorage(Storage):
         return file_id
 
     def get(self, file_id: str) -> bytes:
+        data: urllib3.response.HTTPResponse = None
         try:
-            data: urllib3.response.HTTPResponse = self._client.get_object(settings.MINIO_BUCKET, file_id)
+            data = self._client.get_object(settings.MINIO_BUCKET, file_id)
             return data.data
         except Exception:
             return b""
         finally:
-            data.close()
-            data.release_conn()
+            if data:
+                data.close()
+                data.release_conn()
 
     def remove(self, file_id: str) -> None:
         self._client.remove_object(settings.MINIO_BUCKET, file_id)

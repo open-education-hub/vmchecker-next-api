@@ -62,6 +62,7 @@ class Runner:
                         pass
                 except Exception as e:
                     log.error(f"Error on task {task.pk}: {str(e)}")
+                    log.exception(e)
                     task.state = TaskState.error.value
                     task.errorInfo = str(e)
                     task.save()

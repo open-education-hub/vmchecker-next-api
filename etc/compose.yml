@@ -1,40 +1,56 @@
 version: "3.9"
 services:
   backend:
-    image: jokeswar/vmchecker-api
+    image: jokeswar/vmchecker_api:master
     restart: always
     depends_on:
       - database
       - storage
-    env_file:
-      - ../.env
+    environment:
+      MINIO_ADDRESS: "storage:9000"
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_USER: "${DATABASE_USER}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_HOST: "database"
+      DATABASE_PORT: "5432"
     ports:
       - "8000:8000"
+    volumes:
+      - /vagrant/vmchecker-next-api:/opt/api
+    networks:
+      - database-network
+      - storage-network
 
   database:
     image: postgres:12.0-alpine
     restart: always
-    ports:
-      - "5432:${DATABASE_PORT}"
     environment:
       POSTGRES_DB: "${DATABASE_NAME}"
       POSTGRES_USER: "${DATABASE_USER}"
       POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
     volumes:
       - db-data:/var/lib/postgresql/data
+    networks:
+      - database-network
 
   storage:
     image: minio/minio
     restart: always
     command: [ "server", "/data" ]
-    ports:
-      - "9000:9000"
     environment:
       MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
       MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
     volumes:
       - storage-data:/data
+    networks:
+      - storage-network
 
 volumes:
   storage-data:
   db-data:
+
+networks:
+    database-network:
+    storage-network:
