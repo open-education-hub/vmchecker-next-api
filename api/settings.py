@@ -4,7 +4,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret-key")
 
 GITLAB_URL = os.environ.get("GITLAB_URL", "https://gitlab.com")
 
