@@ -15,6 +15,7 @@ services:
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_HOST: "database"
       DATABASE_PORT: "5432"
+      SECRET_KEY: "test-secret-key"
       UWSGI_PROCESS_COUNT: "2"
     ports:
       - "8000:8000"
