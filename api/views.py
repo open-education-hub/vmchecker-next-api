@@ -144,7 +144,7 @@ def info(request: Request) -> Response:
 
 
 @api_view(["GET"])
-def healthcheck(_: Request) -> Response:
+def health(_: Request) -> Response:
     return Response({"status": "ok"})
 
 
@@ -155,5 +155,5 @@ api_definition = [
     path("<str:UUID>/trace", view=trace),
     path("archive", view=get_archive),
     path("info", view=info),
-    path("healthcheck", view=healthcheck),
+    path("health", view=health),
 ]
