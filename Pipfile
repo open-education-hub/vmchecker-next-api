@@ -1,3 +1,6 @@
+[scripts]
+deploy-compose = "docker compose -f etc/compose.yml"
+
 [[source]]
 url = "https://pypi.org/simple"
 verify_ssl = true
