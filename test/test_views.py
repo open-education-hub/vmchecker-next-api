@@ -9,7 +9,7 @@ from api.models import Task
 
 
 def test_healthcheck(client: Client):
-    response = client.get("/api/v1/healthcheck")
+    response = client.get("/api/v1/health")
     assert response.json()["status"] == "ok"
 
 
