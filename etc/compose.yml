@@ -19,8 +19,6 @@ services:
       UWSGI_PROCESS_COUNT: "2"
     ports:
       - "8000:8000"
-    volumes:
-      - /vagrant/vmchecker-next-api:/opt/api
     networks:
       - database-network
       - storage-network
