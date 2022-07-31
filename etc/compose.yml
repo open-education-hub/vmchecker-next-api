@@ -7,6 +7,7 @@ services:
       - database
       - storage
     environment:
+      GITLAB_URL: "${GITLAB_URL}"
       MINIO_ADDRESS: "storage:9000"
       MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
       MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
@@ -15,7 +16,7 @@ services:
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       DATABASE_HOST: "database"
       DATABASE_PORT: "5432"
-      SECRET_KEY: "test-secret-key"
+      SECRET_KEY: "${SECRET_KEY}"
       UWSGI_PROCESS_COUNT: "2"
     ports:
       - "8000:8000"
