@@ -18,6 +18,7 @@ class Storage(metaclass=ABCMeta):
     def get(self, file_id: str) -> bytes:
         raise NotImplementedError()
 
+    @abstractmethod
     def remove(self, file_id: str) -> None:
         raise NotImplementedError()
 
@@ -78,7 +79,14 @@ class OnDiskStorage(Storage):
         with open(str(self.data_dir / file_id), "rb") as f:
             return f.read()
 
+    def remove(self, file_id: str) -> None:
+        file_to_remove = Path(self.data_dir) / file_id
+        file_to_remove.unlink(missing_ok=True)
+
 
 storage: Storage = None
-if not os.getenv("API_BUILD"):
+
+if not os.getenv("API_BUILD") and settings.SUBMISSION_STORAGE_TYPE == "MINIO":
     storage = MinioStorage()
+elif settings.SUBMISSION_STORAGE_TYPE == "DISK":
+    storage = OnDiskStorage()

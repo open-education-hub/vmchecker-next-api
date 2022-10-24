@@ -8,6 +8,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret-key")
 
 GITLAB_URL = os.environ.get("GITLAB_URL", "https://gitlab.com")
 
+SUBMISSION_STORAGE_TYPE = os.environ.get("SUBMISSION_STORAGE_TYPE", "DISK")
+
 MINIO_ADDRESS = os.environ.get("MINIO_ADDRESS", "localhost:9000")
 MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY", "1234")
 MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "123456789")
@@ -36,7 +38,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
