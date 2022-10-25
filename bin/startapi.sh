@@ -2,6 +2,7 @@
 
 cd "$(dirname "${BASH_SOURCE[0]}")"/.. || exit 1
 
+sleep 2 # make sure that the DB container is up
 ./manage.py migrate
 exec uwsgi --chdir="$(pwd)" \
     --env DJANGO_SETTINGS_MODULE=api.settings \
