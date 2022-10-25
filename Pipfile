@@ -1,5 +1,7 @@
 [scripts]
 deploy-compose = "docker compose -f etc/compose.yml"
+docker-compose-dev = "docker compose -f etc/compose.yml --env-file ./etc/.env.development"
+docker-compose-prod = "docker compose -f etc/compose.yml --env-file ./etc/.env.production"
 
 [[source]]
 url = "https://pypi.org/simple"
