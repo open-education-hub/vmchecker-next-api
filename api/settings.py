@@ -19,6 +19,8 @@ DEBUG = os.environ.get("DEBUG", False)
 
 ALLOWED_HOSTS = ["*"]
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
+
 # Application definition
 
 INSTALLED_APPS = [
