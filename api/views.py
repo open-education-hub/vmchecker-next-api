@@ -97,10 +97,11 @@ def cancel(_: Request, UUID: str) -> Response:
 
 @api_view(["POST"])
 def get_archive(request: Request) -> Response:
+    branch = request.data["gitlab_branch"] if request.data["gitlab_branch"] else "master"
     gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=request.data["gitlab_private_token"])
     project = gl.projects.get(request.data["gitlab_project_id"])
 
-    tree = project.repository_tree(path="src", ref="master", recursive=True, per_page=100)
+    tree = project.repository_tree(path="src", ref=branch, recursive=True, per_page=100)
 
     archive_buffer = io.BytesIO()
     with zipfile.ZipFile(archive_buffer, "a") as archive:
@@ -109,7 +110,7 @@ def get_archive(request: Request) -> Response:
                 continue
 
             repo_path = tree_item["path"]
-            f = project.files.raw(file_path=repo_path, ref="master")
+            f = project.files.raw(file_path=repo_path, ref=branch)
             archive.writestr(repo_path[len("src/") :], f)
 
     archive_buffer.seek(0)
