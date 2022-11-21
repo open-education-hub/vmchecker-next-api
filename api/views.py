@@ -36,11 +36,13 @@ tasks_error.set_function(lambda: Task.objects.filter(state=TaskState.error.value
 def submit(request: Request) -> Response:
     UUID = str(uuid.uuid4())
     archive_data = base64.decodebytes(request.data["archive"].encode("ascii"))
+    gitlab_branch: str = request.data["gitlab_branch"] if request.data["gitlab_branch"] else "master"
 
     Task.objects.create(
         submission_data_id=storage.put(archive_data),
         gitlab_token=request.data["gitlab_private_token"],
         gitlab_project_id=request.data["gitlab_project_id"],
+        gitlab_branch=gitlab_branch,
         moodle_username=request.data["username"],
         UUID=UUID,
     )

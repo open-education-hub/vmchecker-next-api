@@ -52,7 +52,7 @@ class Runner:
 
                 try:
                     log.info(
-                        f"[pid: {os.getpid()}] Checking task {task.pk} with state {TaskState(task.state).name} and updated at {task.updated_at}"
+                        f"[pid: {os.getpid()}] Checking task {task.pk}-{task.moodle_username}, with state {TaskState(task.state).name} and updated at {task.updated_at}"
                     )
                     if task.state == TaskState.new.value:
                         submit_task(task)
@@ -75,12 +75,12 @@ def submit_task(task: Task) -> None:
     branch_name = f'{task.moodle_username}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}-{task.UUID}'
     data = {
         "branch": branch_name,
-        "start_branch": "master",
+        "start_branch": task.gitlab_branch,
         "commit_message": "VMChecker backend",
         "actions": [],
     }
 
-    items = project.repository_tree(path="src", ref="master", recursive=True, per_page=100)
+    items = project.repository_tree(path="src", ref=task.gitlab_branch, recursive=True, per_page=100)
     paths = list(map(lambda x: x["path"], items))
 
     archive = io.BytesIO(storage.get(task.submission_data_id))
@@ -116,7 +116,7 @@ def pull_task_results(task: Task) -> None:
     job = pipeline.jobs.list()[0]
 
     log.info(
-        f"[pid: {os.getpid()}] Gitlab status of job {job.id} from pipeline {pipeline.id} - (task id: {task.pk}) is {job.status}"
+        f"[pid: {os.getpid()}] Gitlab status of job {job.id} from pipeline {pipeline.id} - (task: {task.pk}-{task.moodle_username}) is {job.status}"
     )
 
     if job.status == "canceled":

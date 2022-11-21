@@ -28,6 +28,7 @@ class Task(models.Model):
     gitlab_token = models.CharField(max_length=256, blank=False)
     gitlab_project_id = models.BigIntegerField(blank=False)
     gitlab_pipeline_id = models.BigIntegerField(default=-1)
+    gitlab_branch = models.CharField(max_length=256, blank=False, default="main")
     moodle_username = models.CharField(max_length=256, blank=False)
     state = models.CharField(
         max_length=1,
