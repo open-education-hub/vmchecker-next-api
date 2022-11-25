@@ -36,7 +36,7 @@ tasks_error.set_function(lambda: Task.objects.filter(state=TaskState.error.value
 def submit(request: Request) -> Response:
     UUID = str(uuid.uuid4())
     archive_data = base64.decodebytes(request.data["archive"].encode("ascii"))
-    gitlab_branch: str = request.data["gitlab_branch"] if request.data["gitlab_branch"] else "master"
+    gitlab_branch: str = request.data["gitlab_branch"] if "gitlab_branch" in request.data else "master"
 
     Task.objects.create(
         submission_data_id=storage.put(archive_data),
@@ -97,7 +97,7 @@ def cancel(_: Request, UUID: str) -> Response:
 
 @api_view(["POST"])
 def get_archive(request: Request) -> Response:
-    branch = request.data["gitlab_branch"] if request.data["gitlab_branch"] else "master"
+    branch = request.data["gitlab_branch"] if "gitlab_branch" in request.data else "master"
     gl = gitlab.Gitlab(settings.GITLAB_URL, private_token=request.data["gitlab_private_token"])
     project = gl.projects.get(request.data["gitlab_project_id"])
 
