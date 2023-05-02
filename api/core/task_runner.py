@@ -80,7 +80,7 @@ def submit_task(task: Task) -> None:
         "actions": [],
     }
 
-    items = project.repository_tree(path="src", ref=task.gitlab_branch, recursive=True, per_page=100)
+    items = project.repository_tree(path="src", ref=task.gitlab_branch, recursive=True, get_all=True)
     paths = list(map(lambda x: x["path"], items))
 
     log.info(f"The src/ folder of task {task.pk} contains the following paths: {paths}")
@@ -89,7 +89,7 @@ def submit_task(task: Task) -> None:
     zip_archive = zipfile.ZipFile(archive, "r")
     archive_namelist = zip_archive.namelist()
 
-    log.info(f"The archive of task {task.pk} contains the following paths: {paths}")
+    log.info(f"The archive of task {task.pk} contains the following paths: {archive_namelist}")
     for filename in archive_namelist:
         if filename.endswith("/"):
             continue
