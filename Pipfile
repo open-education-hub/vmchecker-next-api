@@ -17,6 +17,7 @@ minio = "*"
 uwsgi = "*"
 psycopg2-binary = "*"
 django-prometheus = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 pylint = "*"

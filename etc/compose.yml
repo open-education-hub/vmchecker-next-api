@@ -8,6 +8,7 @@ services:
       - storage
     environment:
       GITLAB_URL: "${GITLAB_URL}"
+      SENTRY_SDK_DSN: "${SENTRY_SDK_DSN}"
       MINIO_ADDRESS: "storage:9000"
       MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
       MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
