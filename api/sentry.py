@@ -1,15 +1,11 @@
-from typing import Union
+from typing import Any, Dict, Union
 
 import sentry_sdk
 from django.conf import settings
-from sentry_sdk._types import TYPE_CHECKING
 from sentry_sdk.integrations.django import DjangoIntegration
 
-if TYPE_CHECKING:
-    from sentry_sdk._types import SamplingContext
 
-
-def traces_sampler(ctx: SamplingContext) -> Union[float, int, bool]:
+def traces_sampler(ctx: Dict[str, Any]) -> Union[float, int, bool]:
     # Other kinds of transactions don't have a URL
     url = ""
 
