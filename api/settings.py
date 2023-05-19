@@ -2,9 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret-key")
@@ -151,12 +148,3 @@ LOGGING = {
 }
 
 SENTRY_SDK_DSN = os.environ.get("SENTRY_SDK_DSN", None)
-if SENTRY_SDK_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_SDK_DSN,
-        integrations=[
-            DjangoIntegration(),
-        ],
-        traces_sample_rate=0.1,
-        send_default_pii=True,
-    )
