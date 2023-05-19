@@ -21,6 +21,11 @@ services:
       UWSGI_PROCESS_COUNT: "2"
     ports:
       - "8000:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "5"
     networks:
       - database-network
       - storage-network
