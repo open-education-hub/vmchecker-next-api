@@ -1,3 +1,8 @@
+[scripts]
+docker-compose = "docker compose -f etc/compose.yml -p api"
+docker-compose-dev = "pipenv run docker-compose --env-file ./etc/.env.development"
+docker-compose-prod = "pipenv run docker-compose --env-file ./etc/.env.production"
+
 [[source]]
 url = "https://pypi.org/simple"
 verify_ssl = true
@@ -7,10 +12,16 @@ name = "pypi"
 django = "*"
 djangorestframework = "*"
 gitpython = "*"
+python-gitlab = "*"
+minio = "*"
+uwsgi = "*"
+psycopg2-binary = "*"
+django-prometheus = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 pylint = "*"
 mypy = "*"
-
-[requires]
-python_version = "3.8"
+locust = "*"
+black = "*"
+pytest-django = "*"
