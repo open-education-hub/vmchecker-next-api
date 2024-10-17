@@ -1,0 +1,65 @@
+version: "3.9"
+services:
+  backend:
+    image: jokeswar/vmchecker_api:master
+    restart: always
+    depends_on:
+      - database
+      - storage
+    environment:
+      GITLAB_URL: "${GITLAB_URL}"
+      SENTRY_SDK_DSN: "${SENTRY_SDK_DSN}"
+      SUBMISSION_STORAGE_TYPE: "${SUBMISSION_STORAGE_TYPE}"
+      MINIO_ADDRESS: "storage:9000"
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_USER: "${DATABASE_USER}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_HOST: "database"
+      DATABASE_PORT: "5432"
+      SECRET_KEY: "${SECRET_KEY}"
+      UWSGI_PROCESS_COUNT: "2"
+    ports:
+      - "8000:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "5"
+    networks:
+      - database-network
+      - storage-network
+
+  database:
+    image: postgres:13.0-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: "${DATABASE_NAME}"
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - database-network
+
+  storage:
+    image: minio/minio:RELEASE.2022-10-24T18-35-07Z
+    restart: always
+    command: [ "server", "/data" ]
+    environment:
+      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
+      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
+    volumes:
+      - storage-data:/data
+    networks:
+      - storage-network
+
+volumes:
+  storage-data:
+  db-data:
+
+
+networks:
+  database-network:
+  storage-network:
