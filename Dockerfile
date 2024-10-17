@@ -1,7 +1,7 @@
-FROM python:3.8.10-buster
+FROM python:3.10.12-buster
 
 RUN set -e \
- && pip install pipenv
+    && pip install pipenv
 
 WORKDIR /opt/api
 COPY Pipfile Pipfile.lock ./
