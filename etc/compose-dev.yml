@@ -1,0 +1,96 @@
+services:
+  mariadb:
+    image: bitnami/mariadb:11.4
+    environment:
+      ALLOW_EMPTY_PASSWORD: 'yes'
+      MARIADB_USER: 'bn_moodle'
+      MARIADB_DATABASE: 'bitnami_moodle'
+      MARIADB_CHARACTER_SET: 'utf8mb4'
+      MARIADB_COLLATE: 'utf8mb4_unicode_ci'
+    volumes:
+      - mariadb_data:/bitnami/mariadb
+
+  moodle:
+    image: bitnami/moodle:4.5
+    ports:
+      - '80:8080'
+      - '443:8443'
+    environment:
+      MOODLE_DATABASE_HOST: 'mariadb'
+      MOODLE_DATABASE_PORT_NUMBER: '3306'
+      MOODLE_DATABASE_USER: 'bn_moodle'
+      MOODLE_DATABASE_NAME: 'bitnami_moodle'
+      ALLOW_EMPTY_PASSWORD: 'yes'
+      MOODLE_USERNAME: 'admin'
+      MOODLE_PASSWORD: 'Parola-123'
+    volumes:
+      - ../../vmchecker:/bitnami/moodle/blocks/vmchecker # NOTE: Change the path ('../../vmchecker') to the location you downloaded the vmchecker plugin to
+      - moodle_data:/bitnami/moodle
+      - moodledata_data:/bitnami/moodledata
+    depends_on:
+      - mariadb
+
+  postgres:
+    image: postgres:13.0-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: 'backend'
+      POSTGRES_USER: 'backend_user'
+      POSTGRES_PASSWORD: 'pass'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:RELEASE.2022-10-24T18-35-07Z
+    restart: always
+    command: [ 'server', '/data' ]
+    environment:
+      MINIO_ACCESS_KEY: 'access_key'
+      MINIO_SECRET_KEY: 'secret_key'
+    volumes:
+      - minio_data:/data
+
+  backend:
+    image: jokeswar/vmchecker_api:latest
+    restart: always
+    build: ../
+    pull_policy: build
+    stop_signal: SIGKILL
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../api
+          target: /opt/api/api
+        - action: sync+restart
+          path: ../etc/api.ini
+          target: /opt/api/etc/api.ini
+    environment:
+      GITLAB_URL: 'https://gitlab.com'
+      MINIO_ADDRESS: 'minio:9000'
+      MINIO_ACCESS_KEY: 'access_key'
+      MINIO_SECRET_KEY: 'secret_key'
+      DATABASE_NAME: 'backend'
+      DATABASE_USER: 'backend_user'
+      DATABASE_PASSWORD: 'pass'
+      DATABASE_HOST: 'postgres'
+      DATABASE_PORT: '5432'
+      SECRET_KEY: 'backend_secret'
+      UWSGI_PROCESS_COUNT: '2'
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+      - minio
+      - moodle
+
+volumes:
+  mariadb_data:
+    driver: local
+  moodle_data:
+    driver: local
+  moodledata_data:
+    driver: local
+  minio_data:
+    driver: local
+  postgres_data:
+    driver: local

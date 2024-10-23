@@ -1,6 +1,6 @@
 [scripts]
 docker-compose = "docker compose -f etc/compose.yml -p api"
-docker-compose-dev = "pipenv run docker-compose --env-file ./etc/.env.development"
+docker-compose-dev = "bin/dev.sh"
 docker-compose-prod = "pipenv run docker-compose --env-file ./etc/.env.production"
 
 [[source]]
