@@ -12,6 +12,7 @@ sentry.initialize()
 
 if os.getenv("DEBUG") != "True":
     import uwsgidecorators
+
     @uwsgidecorators.postfork
     def preload():
         from api.core.task_runner import Runner
