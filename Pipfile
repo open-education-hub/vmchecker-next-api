@@ -18,6 +18,7 @@ uwsgi = "*"
 psycopg2-binary = "*"
 django-prometheus = "*"
 sentry-sdk = "*"
+debugpy = "*"
 
 [dev-packages]
 pylint = "*"

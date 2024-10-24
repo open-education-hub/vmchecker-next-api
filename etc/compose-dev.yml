@@ -24,9 +24,9 @@ services:
       MOODLE_USERNAME: 'admin'
       MOODLE_PASSWORD: 'Parola-123'
     volumes:
-      - ../../vmchecker:/bitnami/moodle/blocks/vmchecker # NOTE: Change the path ('../../vmchecker') to the location you downloaded the vmchecker plugin to
       - moodle_data:/bitnami/moodle
       - moodledata_data:/bitnami/moodledata
+      - ../../vmchecker:/bitnami/moodle/blocks/vmchecker # NOTE: Change the path ('../../vmchecker') to the location you cloned the vmchecker plugin to
     depends_on:
       - mariadb
 
@@ -65,6 +65,7 @@ services:
           path: ../etc/api.ini
           target: /opt/api/etc/api.ini
     environment:
+      DEBUG: 'True'
       GITLAB_URL: 'https://gitlab.com'
       MINIO_ADDRESS: 'minio:9000'
       MINIO_ACCESS_KEY: 'access_key'
@@ -78,6 +79,7 @@ services:
       UWSGI_PROCESS_COUNT: '2'
     ports:
       - '8000:8000'
+      - '5678:5678' # python debug port
     depends_on:
       - postgres
       - minio
