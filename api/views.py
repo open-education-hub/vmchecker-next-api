@@ -52,7 +52,11 @@ def submit(request: Request) -> Response:
 
 @api_view(["GET"])
 def status(_: Request, UUID: str) -> Response:
-    task = Task.objects.get(UUID=UUID)
+    task = Task.objects.filter(UUID=UUID).first()
+    if task is None:
+        log.warning(f"Task '{UUID}' does not exist! Returning error state!")
+        return Response({"status": TaskState.error.name})
+
     return Response({"status": TaskState(task.state).name})
 
 

@@ -6,7 +6,7 @@ sleep 2 # make sure that the DB container is up
 ./manage.py migrate
 
 
-if [[ "$DEBUG" == "True" ]] ; then
+if [[ "$DEBUG" != "True" ]] ; then
     exec uwsgi --chdir="$(pwd)" \
         --env DJANGO_SETTINGS_MODULE=api.settings \
         --env API_TASK_RUNNER_ENABLED=True \

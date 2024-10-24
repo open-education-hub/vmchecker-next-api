@@ -59,11 +59,8 @@ services:
     develop:
       watch:
         - action: sync+restart
-          path: ../api
-          target: /opt/api/api
-        - action: sync+restart
-          path: ../etc/api.ini
-          target: /opt/api/etc/api.ini
+          path: ../
+          target: /opt/api
     environment:
       DEBUG: 'True'
       GITLAB_URL: 'https://gitlab.com'
