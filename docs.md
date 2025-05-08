@@ -68,6 +68,8 @@ Usage:
   vmck shell
 ```
 
+Will provide an interactive shell inside the assignemnt container through which you'll complete your tasks.
+
 **Example**
 
 #### Check
@@ -78,6 +80,8 @@ Usage:
   vmck check
 ```
 
+Will run the checker on your current assingment.
+
 **Example**
 
 #### Submit
@@ -87,6 +91,56 @@ Submit assignment
 Usage:
   vmck submit
 ```
+
+Will prepare an archive with your submission to be sent to Moodle. An authentication URL, valid for 60s, will be printed where you will need to log in.
+
+**Example**
+
+#### Start
+```
+Start the assignment environment
+
+Usage:
+  vmck start
+```
+
+Will start all assignment containers. Equivalent to `docker start <container-id>`.
+
+**Example**
+
+#### Stop
+```
+Stop all containers
+
+Usage:
+  vmck stop
+```
+
+Will pause all assignment containers. Equivalent to `docker stop <container-id>`.
+
+**Example**
+
+#### Update
+```
+Update all containers
+
+Usage:
+  vmck update
+```
+
+This will stop all containers, pull their latest version and start them from scratch. All dynamic configurations will **not** be saved.
+
+**Example**
+
+#### Clean
+```
+Clear the environment. Remove all docker containers, and any stored data
+
+Usage:
+  vmck clean
+```
+
+This will remove the entire assignment information, deleting all your work. This operation is not **reversible**. Make sure you submit and check your assignment before running this command.
 
 **Example**
 
@@ -162,7 +216,7 @@ The checker development API has exposes 2 interfaces: checker and printer.
 
 The checker has the following interface:
 
-```
+```golang
 /*
 * Registers a callback function for a test. The name of the test will be testName.
 */
@@ -181,7 +235,7 @@ WriteResults(location string) error
 
 The printer has the following interface:
 
-```
+```golang
 /*
 * It exposes part of the fmt package api. It will print the message to the stdout and keep it in memory for signing purposes.
 */
